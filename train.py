@@ -24,7 +24,7 @@ val = pd.read_pickle('dev.pkl')
 test = pd.read_pickle('test.pkl')
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 #print(Counter(all_labels))
-replacing_labels = {'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'thang_cap': 'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'nam_cap': 'O', 'key_nam_cap': 'O', 'key_thang_cap': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O', 'van_tay_trai': 'O'}
+replacing_labels = {'ignore_1': 'O', 'ignore_2': 'O', 'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'thang_cap': 'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'nam_cap': 'O', 'key_nam_cap': 'O', 'key_thang_cap': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O', 'van_tay_trai': 'O'}
 
 train[1] = [replace_list(ls) for ls in train[1]]
 val[1] = [replace_list(ls) for ls in val[1]]
