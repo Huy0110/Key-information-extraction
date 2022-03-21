@@ -33,3 +33,4 @@ id2label = {idx: label for idx, label in enumerate(labels)}
 
 #print(train[0][0])
 #print(train[1][0])
+#Vissual
