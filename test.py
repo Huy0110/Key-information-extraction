@@ -110,7 +110,7 @@ val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=2)
 
 
-model = LayoutLMv2ForTokenClassification.from_pretrained('microsoft/layoutlmv2-base-uncased',
+model = LayoutLMv2ForTokenClassification.from_pretrained('Checkpoints/',
                                                                       num_labels=len(labels))
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -126,8 +126,8 @@ for k,v in encoding.items():
 
 #model = torch.load('Checkpoints/config.json')
 #model = torch.hub.load('huggingface/transformers', 'XLMConfig', 'Checkpoints')
-config = AutoConfig.from_json_file('.Checkpoints/config.json')
-model = torch.hub.load('huggingface/pytorch-transformers', 'model', './tf_model/bert_tf_checkpoint.ckpt.index', from_tf=True, config=config)
+#config = AutoConfig.from_json_file('.Checkpoints/config.json')
+#model = torch.hub.load('huggingface/pytorch-transformers', 'model', './tf_model/bert_tf_checkpoint.ckpt.index', from_tf=True, config=config)
 
 model.eval()
 # forward pass
