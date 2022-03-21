@@ -4,7 +4,6 @@ import random
 from PIL import ImageDraw, ImageFont
 from matplotlib.font_manager import json_load
 
-
 from tqdm.notebook import tqdm
 import os
 
