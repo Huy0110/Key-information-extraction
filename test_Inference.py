@@ -7,11 +7,11 @@ import torch
 from tqdm.notebook import tqdm
 from os import listdir
 from PIL import Image
-from clearml import Task
-from torch.utils.tensorboard import SummaryWriter
-
-writer = SummaryWriter("runs")
-task = Task.init(project_name='ID Card', task_name='test model')
+from seqeval.metrics import (
+    classification_report,
+    f1_score,
+    precision_score,
+    recall_score)
 
 
 
@@ -24,34 +24,13 @@ def replace_elem(elem):
 def replace_list(ls):
   return [replace_elem(elem) for elem in ls]
 
-def display_val(model, val_dataloader, writer, global_step):
-  losses = []
-  running_loss_val = 0.0
-  for batch in tqdm(val_dataloader, desc="Evaluating"):
-    with torch.no_grad():
-        input_ids = batch['input_ids'].to(device)
-        bbox = batch['bbox'].to(device)
-        image = batch['image'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        token_type_ids = batch['token_type_ids'].to(device)
-        labels = batch['labels'].to(device)
-
-        # forward pass
-        outputs = model(input_ids=input_ids, bbox=bbox, image=image, attention_mask=attention_mask, 
-                        token_type_ids=token_type_ids, labels=labels)
-
-        loss = outputs.loss
-        losses.append(loss.item())
-  arg_loss = sum(losses) / len(losses)
-  writer.add_scalar('val_loss', arg_loss, global_step)
-  return arg_loss
-
 train = pd.read_pickle('train.pkl')
 val = pd.read_pickle('dev.pkl')
 test = pd.read_pickle('test.pkl')
+debug = pd.read_pickle('debug.pkl')
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 #print(Counter(all_labels))
-replacing_labels = {'title_en': 'title', 'chxh_2_en':'O','key_ngon_tro_trai_en':'O','key_ngon_tro_phai_en':'O','value_nguoi_cap':'O','key_ngon_tro_trai':'O','cnxh_1_en': 'O','chxh_1_en':'O','ignore_1_en': 'O', 'ignore_2_en':'O', 'noi_cap_1':'O', 'noi_cap_2': 'O', 'driver_license_bo_gtvt_1': 'O', 'driver_license_bo_gtvt_2': 'O', 'dau_vet_1': 'dau_vet', 'dau_vet_2': 'dau_vet', 'ignore_1': 'O', 'ignore_2': 'O', 'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O','van_tay_trai':'O'}
+replacing_labels = {'chxh_2_en':'O','key_ngon_tro_trai_en':'O','key_ngon_tro_phai_en':'O','value_nguoi_cap':'O','key_ngon_tro_trai':'O','cnxh_1_en': 'O','chxh_1_en':'O','ignore_1_en': 'O', 'ignore_2_en':'O', 'noi_cap_1':'O', 'noi_cap_2': 'O', 'driver_license_bo_gtvt_1': 'O', 'driver_license_bo_gtvt_2': 'O', 'dau_vet_1': 'dau_vet', 'dau_vet_2': 'dau_vet', 'ignore_1': 'O', 'ignore_2': 'O', 'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O','van_tay_trai':'O'}
 
 train[1] = [replace_list(ls) for ls in train[1]]
 val[1] = [replace_list(ls) for ls in val[1]]
@@ -59,7 +38,7 @@ test[1] = [replace_list(ls) for ls in test[1]]
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 labels = list(set(all_labels))
 labels = sorted(labels)
-#print(labels)
+print(labels)
 
 label2id = {label: idx for idx, label in enumerate(labels)}
 id2label = {idx: label for idx, label in enumerate(labels)}
@@ -68,6 +47,7 @@ print(label2id)
 #print(id2label)
 
 class Dataset(Dataset):
+    """CORD dataset."""
 
     def __init__(self, annotations, image_dir, processor=None, max_length=512):
         """
@@ -97,16 +77,9 @@ class Dataset(Dataset):
         boxes = self.boxes[idx]
         word_labels = self.labels[idx]
 
-        #assert len(words) == len(boxes) == len(word_labels)
-
-        """ print(len(words))
-        print(len(boxes))
-        print(len(word_labels))
-        print(self.image_dir) """
         assert len(words) == len(boxes) == len(word_labels)
         
         word_labels = [label2id[label] for label in word_labels]
-
 
         #word_labels = [self.label2id[label] for label in word_labels]
         # use processor to prepare everything
@@ -141,35 +114,36 @@ val_dataset = Dataset(annotations=val,
 test_dataset = Dataset(annotations=test,
                             image_dir='test/image/', 
                             processor=processor)
+debug_dataset = Dataset(annotations=debug,
+                            image_dir='debug_image/', 
+                            processor=processor)
 
-train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=4)
+train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=2)
+debug_dataloader = DataLoader(debug_dataset, batch_size=2)
 
-
-model = LayoutLMv2ForTokenClassification.from_pretrained('microsoft/layoutlmv2-base-uncased',
-                                                                      num_labels=len(labels))
+model = LayoutLMv2ForTokenClassification.from_pretrained('Best',num_labels=len(labels))
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
-global_step = 0
-eval_freq = 250
-latest_freq = 500
-display_freq = 100
-loss_best = 100
-num_train_epochs = 4
+#model = torch.load('Checkpoints/config.json')
+#model = torch.hub.load('huggingface/transformers', 'XLMConfig', 'Checkpoints')
+#config = AutoConfig.from_json_file('.Checkpoints/config.json')
+#model = torch.hub.load('huggingface/pytorch-transformers', 'model', './tf_model/bert_tf_checkpoint.ckpt.index', from_tf=True, config=config)
 
+model.eval()
+import numpy as np
 
-#put the model in training mode
-running_loss = 0.0
-n_total_steps = len(train_dataloader)
-model.train() 
-for epoch in range(num_train_epochs):  
-   print("Epoch:", epoch)
-   for batch in tqdm(train_dataloader):
-        # get the inputs;
+preds_val = None
+out_label_ids = None
+
+# put model in evaluation mode
+model.eval()
+for batch in tqdm(test_dataloader, desc="Evaluating"):
+    with torch.no_grad():
         input_ids = batch['input_ids'].to(device)
         bbox = batch['bbox'].to(device)
         image = batch['image'].to(device)
@@ -177,45 +151,43 @@ for epoch in range(num_train_epochs):
         token_type_ids = batch['token_type_ids'].to(device)
         labels = batch['labels'].to(device)
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
+        # forward pass
+        outputs = model(input_ids=input_ids, bbox=bbox, image=image, attention_mask=attention_mask, 
+                        token_type_ids=token_type_ids, labels=labels)
         
-        # forward + backward + optimize
-        outputs = model(input_ids=input_ids,
-                        bbox=bbox,
-                        image=image,
-                        attention_mask=attention_mask,
-                        token_type_ids=token_type_ids,
-                        labels=labels) 
-        loss = outputs.loss
-        running_loss += loss.item()
-        
-        # print loss every 100 steps
-        if global_step % display_freq == 0:
-          print(f"Loss after {global_step} steps: {loss.item()}")
-          writer.add_scalar('training_loss', running_loss / 100, global_step)
-          running_loss = 0.0
+        if preds_val is None:
+          preds_val = outputs.logits.detach().cpu().numpy()
+          out_label_ids = batch["labels"].detach().cpu().numpy()
+        else:
+          preds_val = np.append(preds_val, outputs.logits.detach().cpu().numpy(), axis=0)
+          out_label_ids = np.append(
+              out_label_ids, batch["labels"].detach().cpu().numpy(), axis=0
+          )
+        pred = outputs.logits.argmax(-1).squeeze().tolist()
+        for id, label in zip(input_ids, pred):
+          #print("Type id")
+          #print(type(id))
+          #print(id.shape)
+          #print("Type pred")
+          #print(type(pred))
+          pred_ls = [id2label[label_one] for label_one in label]
+          print("String:")
+          print(len(label))
+          #print(processor.tokenizer.decode(id), pred_ls)
+          print("End")
+          '''
+          for i in range(len(pred)):
+            print("- - - - -- - - - - -")
+            print(processor.tokenizer.decode(id)[i])
+            #print(label)
+            print(id2label[label[i]]) 
+            print("- - - - - - - - - - - ")
+              #print(id2label[label]) for label in label.tolist() if label != -100
+          '''
+#debug_labels = [id2label[idx] for idx in preds_val]
 
-        if global_step % eval_freq == 0 and global_step >= eval_freq:
-          model.eval()
-          loss_eval = display_val(model, val_dataloader, writer, global_step)
-          print("Display val:")
-          print(loss_eval)
-          if(loss_eval < loss_best):
-            loss_best = loss_eval
-            model.save_pretrained("Checkpoints/Best")
-            print("Saving the best model")
-          model.train()
-        
-        if global_step % latest_freq == 0 and global_step >= latest_freq:
-          model.save_pretrained("Checkpoints/Latest")
-          print("Saving the latest model")
+print("END VAL")
+print("START TEST")
 
-        model.save.pretrained("Checkpoints/Epoch")
-        print("Saving the latest epoch model")
-
-        loss.backward()
-        optimizer.step()
-        global_step += 1
-
-#model.save_pretrained("Checkpoints")
+import warnings
+warnings.filterwarnings("ignore")

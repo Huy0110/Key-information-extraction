@@ -4,6 +4,7 @@ import random
 from PIL import ImageDraw, ImageFont
 from matplotlib.font_manager import json_load
 from collections import Counter
+import shutil, os
 
 
 
@@ -23,32 +24,26 @@ def normalize_bbox(bbox, width, height):
 def generate_annotations(path: str):
     annotation_files = []
     file_name = []
-    list_dir = os.listdir(path)
-    list_dir = sorted(list_dir)
+    list_dir_debug = os.listdir(path)
+    list_dir_debug = sorted(list_dir_debug)
     count = 0
-    for js in tqdm(list_dir):
+    for list_dir in tqdm(list_dir_debug):
+        #print(list_dir)
+        objects = os.listdir(os.path.join("debugs",list_dir))
+        files_file = [f for f in objects if os.path.isfile(os.path.join("debugs" + "/" +list_dir, f))]
+        #print(files_file)
+        for js in tqdm(files_file):
+            #print(list_dir + "/"+js)
+            if "ocr_file.json" in list_dir + js:
+                print("Count")
+                with open(os.path.join(path+"/"+list_dir,"ocr_file.json")) as f:
+                    annotation_files.append(json.load(f))
+                    file_name.append(path+"/"+list_dir)
+                    count = count +1
         #print(path+js)
-        if ".json" in path + js: 
-            with open(os.path.join(path, js)) as f:
-                annotation_files.append(json.load(f))
-                file_name.append(path + js)
-                count = count + 1
 
     file_name = sorted(file_name)
     #print(count)
-
-    if("train" in path):
-        path_w = 'myfile_Train_anno.txt'
-        with open(path_w, mode='w') as f:
-            f.writelines('\n'.join(file_name))
-    if("val" in path):
-        path_w = 'myfile_Val_anno.txt'
-        with open(path_w, mode='w') as f:
-            f.writelines('\n'.join(file_name))
-    if("test" in path):
-        path_w = 'myfile_Test_anno.txt'
-        with open(path_w, mode='w') as f:
-            f.writelines('\n'.join(file_name))
 
 
     words = []
@@ -60,8 +55,9 @@ def generate_annotations(path: str):
         boxes_example = []
         labels_example = []
         fn = file_name[count]
-        fn = fn.replace(".json",".png")
-        fn = fn.replace("json","image/")
+        fn = os.path.join(fn, "debug.png")
+        shutil.copy(fn, 'debug_image')
+
         #print(fn)
         im = Image.open(fn)
         count = count + 1
@@ -70,7 +66,7 @@ def generate_annotations(path: str):
         # width, height = js['meta']['image_size']['width'], js['meta']['image_size']['height']
         # loop over OCR annotations
         #pre_length = 0
-        for elem in js:
+        for elem in js["textlines"]:
             pre_length = 0
             txt = elem['text'].split()
             full_length = len(elem['text'])
@@ -79,7 +75,7 @@ def generate_annotations(path: str):
             # important: each bounding box should be in (upper left, lower right) format
             # it took me some time to understand the upper left is (x1, y3)
             # and the lower right is (x3, y1)
-            td1, td2, td3, td4 = elem['polygon']
+            td1, td2, td3, td4 = elem['polys']
             xx1, yy1 = td1
             xx2, yy2 = td2
             xx3, yy3 = td3
@@ -105,17 +101,17 @@ def generate_annotations(path: str):
                     print(box)
                     print("END\n")
                 '''
-                box = normalize_bbox(box, width=width, height=height)
+                #box = normalize_bbox(box, width=width, height=height)
                 if len(tu) < 1:
                         continue
-                if min(box) < 0 or max(box) >1000:  # another bug in which a box had -4
-                        continue
+                #if min(box) < 0 or max(box) >1000:  # another bug in which a box had -4
+                #        continue
                     # another bug in which a box difference was -12
                 if ((box[3] - box[1]) < 0) or ((box[2] - box[0]) < 0):
                         continue
                     # ADDED
                 words_example.append(tu)
-                labels_example.append(elem['key'])
+                labels_example.append("O")
                 boxes_example.append(box)
             #print("END A SEGMENT\n")
         words.append(words_example)
@@ -124,27 +120,18 @@ def generate_annotations(path: str):
 
     return words, boxes, labels
 
+path_debug = 'debugs'
 
-train_path = 'train/json'
-val_path = 'val/json'
-test_path = 'test/json'
+words_debug, boxes_debug, labels_debug = generate_annotations(path_debug)
 
-words_train, boxes_train, labels_train = generate_annotations(train_path)
-words_val, boxes_val, labels_val = generate_annotations(val_path)
-words_test, boxes_test, labels_test = generate_annotations(test_path)
-
-all_labels = [item for sublist in labels_train for item in sublist]
+all_labels = [item for sublist in labels_debug for item in sublist]
 print(Counter(all_labels))
 
 
 
 import pickle
-with open('train.pkl', 'wb') as t:
-    pickle.dump([words_train, labels_train, boxes_train], t)
-with open('dev.pkl', 'wb') as t:
-    pickle.dump([words_val, labels_val, boxes_val], t)
-with open('test.pkl', 'wb') as t:
-    pickle.dump([words_test, labels_test, boxes_test], t)
+with open('debug.pkl', 'wb') as t:
+    pickle.dump([words_debug, labels_debug, boxes_debug], t)
 
 
 

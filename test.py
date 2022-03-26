@@ -7,6 +7,11 @@ import torch
 from tqdm.notebook import tqdm
 from os import listdir
 from PIL import Image
+from seqeval.metrics import (
+    classification_report,
+    f1_score,
+    precision_score,
+    recall_score)
 
 
 
@@ -24,13 +29,14 @@ val = pd.read_pickle('dev.pkl')
 test = pd.read_pickle('test.pkl')
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 #print(Counter(all_labels))
-replacing_labels = {'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'thang_cap': 'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'nam_cap': 'O', 'key_nam_cap': 'O', 'key_thang_cap': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O', 'van_tay_trai': 'O'}
+replacing_labels = {'chxh_2_en':'O','key_ngon_tro_trai_en':'O','key_ngon_tro_phai_en':'O','value_nguoi_cap':'O','key_ngon_tro_trai':'O','cnxh_1_en': 'O','chxh_1_en':'O','ignore_1_en': 'O', 'ignore_2_en':'O', 'noi_cap_1':'O', 'noi_cap_2': 'O', 'driver_license_bo_gtvt_1': 'O', 'driver_license_bo_gtvt_2': 'O', 'dau_vet_1': 'dau_vet', 'dau_vet_2': 'dau_vet', 'ignore_1': 'O', 'ignore_2': 'O', 'chxh_1': 'O', 'chxh_2': 'O', 'key_ho_ten_khac':'O', 'level_nguoi_cap_1': 'O', 'level_nguoi_cap_2': 'O', 'key_hang_cap': 'O', 'nguoi_cap': 'O', 'hang_cap': 'O','van_tay_phai':'O','van_tay_trai':'O'}
 
 train[1] = [replace_list(ls) for ls in train[1]]
 val[1] = [replace_list(ls) for ls in val[1]]
 test[1] = [replace_list(ls) for ls in test[1]]
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 labels = list(set(all_labels))
+labels = sorted(labels)
 print(labels)
 
 label2id = {label: idx for idx, label in enumerate(labels)}
@@ -39,7 +45,7 @@ print(label2id)
 #print(all_labels)
 #print(id2label)
 
-class CORDDataset(Dataset):
+class Dataset(Dataset):
     """CORD dataset."""
 
     def __init__(self, annotations, image_dir, processor=None, max_length=512):
@@ -51,7 +57,10 @@ class CORDDataset(Dataset):
         """
         self.words, self.labels, self.boxes = annotations
         self.image_dir = image_dir
-        self.image_file_names = [f for f in listdir(image_dir)]
+        list_dir_image = listdir(image_dir)
+        list_dir_image = sorted(list_dir_image) 
+        #image_file_names = [f for f in list_dir_image]
+        self.image_file_names = [f for f in list_dir_image]
         self.processor = processor
 
     def __len__(self):
@@ -95,13 +104,13 @@ from transformers import LayoutLMv2Processor
 
 processor = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-base-uncased", revision="no_ocr")
 
-train_dataset = CORDDataset(annotations=train,
+train_dataset = Dataset(annotations=train,
                             image_dir='train/image/', 
                             processor=processor)
-val_dataset = CORDDataset(annotations=val,
+val_dataset = Dataset(annotations=val,
                             image_dir='val/image/', 
                             processor=processor)
-test_dataset = CORDDataset(annotations=test,
+test_dataset = Dataset(annotations=test,
                             image_dir='test/image/', 
                             processor=processor)
 
@@ -110,8 +119,7 @@ val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=2)
 
 
-model = LayoutLMv2ForTokenClassification.from_pretrained('Checkpoints/',
-                                                                      num_labels=len(labels))
+model = LayoutLMv2ForTokenClassification.from_pretrained('Checkpoints/Best',num_labels=len(labels))
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
@@ -174,11 +182,6 @@ print("START TEST")
 
 import warnings
 warnings.filterwarnings("ignore")
-from seqeval.metrics import (
-    classification_report,
-    f1_score,
-    precision_score,
-    recall_score)
 
 def results_test(preds, out_label_ids, labels):
   preds = np.argmax(preds, axis=2)
@@ -201,7 +204,7 @@ def results_test(preds, out_label_ids, labels):
   }
   return results, classification_report(out_label_list, preds_list)
 
-  labels = list(set(all_labels))
+labels = list(set(all_labels))
 val_result, class_report = results_test(preds_val, out_label_ids, labels)
 print("Overall results:", val_result)
 print(class_report)

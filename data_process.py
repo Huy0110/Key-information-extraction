@@ -121,6 +121,49 @@ for js in os.listdir(forder):
 forder = 'cc_back'
 count_json = 0
 
+for js in os.listdir(forder):
+    if count_json < 1600:
+        if "json" in forder + js :
+            shutil.move(os.path.join(forder, js), './train/json')
+            shutil.move(os.path.join(forder, js).replace(".json",".png"), './train/image')
+            count_json = count_json +1
+    else: 
+        if count_json <1800 :
+            if "json" in forder + js :
+                shutil.move(os.path.join(forder, js), './val/json')
+                shutil.move(os.path.join(forder, js).replace(".json",".png"), './val/image')
+                count_json = count_json +1
+        else:
+            if "json" in forder + js :
+                shutil.move(os.path.join(forder, js), './test/json')
+                shutil.move(os.path.join(forder, js).replace(".json",".png"), './test/image')
+                count_json = count_json +1
+
+forder = 'cc_chip_front'
+count_json = 0
+count_img = 0
+
+for js in os.listdir(forder):
+    if count_json < 1600:
+        if "json" in forder + js :
+            shutil.move(os.path.join(forder, js), './train/json')
+            shutil.move(os.path.join(forder, js).replace(".json",".png"), './train/image')
+            count_json = count_json +1
+    else: 
+        if count_json <1800 :
+            if "json" in forder + js :
+                shutil.move(os.path.join(forder, js), './val/json')
+                shutil.move(os.path.join(forder, js).replace(".json",".png"), './val/image')
+                count_json = count_json +1
+        else:
+            if "json" in forder + js :
+                shutil.move(os.path.join(forder, js), './test/json')
+                shutil.move(os.path.join(forder, js).replace(".json",".png"), './test/image')
+                count_json = count_json +1
+
+forder = 'cc_chip_back'
+count_json = 0
+count_img = 0
 
 for js in os.listdir(forder):
     if count_json < 1600:
