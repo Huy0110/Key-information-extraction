@@ -132,6 +132,7 @@ print(Counter(all_labels))
 import pickle
 with open('debug.pkl', 'wb') as t:
     pickle.dump([words_debug, labels_debug, boxes_debug], t)
+    
 
 
 
