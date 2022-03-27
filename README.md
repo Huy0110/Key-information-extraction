@@ -14,7 +14,7 @@ pip install -q ./transformers
 
 # Dataset
 
-- The original datase has 3 forders: Train, Val, Test as in this repo
+- The example of original datase has 3 forders: Train, Val, Test as in this repo
 - The formated dataset is similar to https://drive.google.com/drive/folders/1_r2rgPKBqqFmEFoNvz2lQGfIIfRALJ_W
 
 # Run
