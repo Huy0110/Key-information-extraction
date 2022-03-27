@@ -12,6 +12,11 @@ pip install -q ./transformers
 - torch==1.8.0+cu101 torchvision==0.9.0+cu101
 - detectron2
 
+# Dataset
+
+### Formated dataset is similar to https://drive.google.com/drive/folders/1_r2rgPKBqqFmEFoNvz2lQGfIIfRALJ_W
+### The original datase has 3 forders: Train, Val, Test as in this repo
+
 # Run
 ## Converted original dataset to the formated dataset
 ```bash
