@@ -90,3 +90,4 @@ for i in range(len(train[0][k])):
 
 image.save('anh1.png')
 
+
