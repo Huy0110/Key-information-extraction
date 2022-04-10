@@ -41,5 +41,14 @@ python train.py
 
 ## Test
 ```bash
-python test.py
+python test.py --path_test 'Best'
+```
+
+## Inference ( Updating )
+```bash
+python new_gennerate_for_inference.py
+```
+
+```bash
+python new_get_tet_inference_result.py
 ```
