@@ -52,3 +52,9 @@ python new_gennerate_for_inference.py
 ```bash
 python new_get_tet_inference_result.py
 ```
+
+## Save the Checkpoint to Drive
+You can use rclone to do this task, for example:
+```bash
+bash script.sh
+```
