@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Layout_XLM
 =======
 # Key-information-extraction
@@ -45,4 +45,3 @@ python train.py
 ```bash
 python test.py
 ```
->>>>>>> b2823e770e24a229ad1f52c59731daa802c0a10a
