@@ -50,12 +50,12 @@ test[1] = [replace_list(ls) for ls in test[1]]
 all_labels = [item for sublist in train[1] for item in sublist] + [item for sublist in val[1] for item in sublist] + [item for sublist in test[1] for item in sublist]
 labels = list(set(all_labels))
 labels = sorted(labels)
-print(labels)
+#print(labels)
 numberOfLabel = len(labels)
 
 label2id = {label: idx for idx, label in enumerate(labels)}
 id2label = {idx: label for idx, label in enumerate(labels)}
-print(label2id)
+#print(label2id)
 #print(all_labels)
 #print(id2label)
 
@@ -203,7 +203,7 @@ for batch in tqdm(debug_dataloader, desc="Evaluating"):
 
 for key in Final_pred:
     Final_result[key] = listToString(Final_pred[key])
-print(Final_result)
+#print(Final_result)
 with open(os.path.join(path_test, "sample.json"), "w") as outfile:
     json.dump(Final_result, outfile,indent = 4)
 #debug_labels = [id2label[idx] for idx in preds_val]
