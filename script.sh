@@ -1,0 +1,1 @@
+while true; do rclone copy Checkpoints test:Intern ; sleep 900; done
