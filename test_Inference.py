@@ -7,6 +7,7 @@ import torch
 from tqdm.notebook import tqdm
 from os import listdir
 from PIL import Image
+import json
 from seqeval.metrics import (
     classification_report,
     f1_score,
@@ -130,11 +131,6 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
-#model = torch.load('Checkpoints/config.json')
-#model = torch.hub.load('huggingface/transformers', 'XLMConfig', 'Checkpoints')
-#config = AutoConfig.from_json_file('.Checkpoints/config.json')
-#model = torch.hub.load('huggingface/pytorch-transformers', 'model', './tf_model/bert_tf_checkpoint.ckpt.index', from_tf=True, config=config)
-
 model.eval()
 import numpy as np
 
@@ -144,7 +140,9 @@ out_label_ids = None
 # put model in evaluation mode
 model.eval()
 Final_pred = {}
+count =0
 for batch in tqdm(debug_dataloader, desc="Evaluating"):
+    count = count +1
     with torch.no_grad():
         input_ids = batch['input_ids'].to(device)
         bbox = batch['bbox'].to(device)
@@ -166,40 +164,17 @@ for batch in tqdm(debug_dataloader, desc="Evaluating"):
               out_label_ids, batch["labels"].detach().cpu().numpy(), axis=0
           )
         pred = outputs.logits.argmax(-1).squeeze().tolist()
-        #print("SHAPE:")
-        #print(input_ids.shape)
-        for id, label in zip(input_ids.squeeze(), pred):
-          #list_id = []
-          #list_id.append(id)
-          #print("-----ID-----")
-          #print(id)
-          #print(type(list_id))
-          #print("------------------")
-          #print(processor.tokenizer.decode(id), id2label[label])
-          if label in Final_pred:
-            Final_pred[label].append(processor.tokenizer.decode(id))
-          else:
-            Final_pred[label] = [processor.tokenizer.decode(id)]
-          #print(label)
-          #print("Type id")
-          #print(type(id))
-          #print(id.shape)
-          #print("Type pred")
-          #print(type(pred))
-          #pred_ls = [id2label[label_one] for label_one in label]
-          #print("String:")
-          #print(len(label))
-          #print(processor.tokenizer.decode(id), pred_ls)
-          #print("End")
 
-          '''
-          for i in range(len(pred)):
-            print("- - - - -- - - - - -")
-            print(processor.tokenizer.decode(id)[i])
-            #print(label)
-            print(id2label[label[i]]) 
-            print("- - - - - - - - - - - ")
-              #print(id2label[label]) for label in label.tolist() if label != -100
-            '''
+        for id, label in zip(input_ids.squeeze(), pred):
+          if label == 0:
+            continue
+          if id2label[label] in Final_pred:
+            Final_pred[id2label[label]].append(processor.tokenizer.decode(id))
+          else:
+            Final_pred[id2label[label]] = [processor.tokenizer.decode(id)]
+    if count == 5:
+      break
 print(Final_pred)
+with open("sample.json", "w") as outfile:
+    json.dump(Final_pred, outfile, indent = 4)
 #debug_labels = [id2label[idx] for idx in preds_val]
