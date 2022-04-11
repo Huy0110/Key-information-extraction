@@ -44,7 +44,7 @@ bash script_train.sh
 python test.py --path_test 'Best'
 ```
 
-## Inference ( Updating )
+## Inference
 ```bash
 python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```
@@ -58,3 +58,4 @@ You can use rclone to do this task, for example:
 ```bash
 bash script.sh
 ```
+In addition, you can change the path or forder in script.sh to save the forder you want to your Drive
