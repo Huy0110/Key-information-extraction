@@ -36,7 +36,7 @@ If you want to visualise the data, you need to remove the normalize step in genn
 
 ## Train
 ```bash
-python train.py
+bash script_train.sh
 ```
 
 ## Test
@@ -46,11 +46,11 @@ python test.py --path_test 'Best'
 
 ## Inference ( Updating )
 ```bash
-python new_gennerate_for_inference.py
+python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```
 
 ```bash
-python new_get_tet_inference_result.py
+python new_get_tet_inference_result.py --path_check 'Best' --save_forder 'debug_pkl'
 ```
 
 ## Save the Checkpoint to Drive
