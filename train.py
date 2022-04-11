@@ -7,10 +7,42 @@ from transformers import LayoutLMv2Processor
 import torch
 from tqdm.notebook import tqdm
 from os import listdir
+import os
 from PIL import Image
 from clearml import Task
 from torch.utils.tensorboard import SummaryWriter
 from data_loader import Data_Loader
+import argparse
+
+# required arg
+
+parser = argparse.ArgumentParser()
+   
+parser.add_argument('--forder_best', required=True, type=str)
+parser.add_argument('--forder_latest', required=True, type=str)
+parser.add_argument('--forder_epoch', required=True, type=str)
+
+parser.add_argument('--eval_freq', required=True, type=int)
+parser.add_argument('--latest_freq', required=True, type=int)
+parser.add_argument('--display_freq', required=True, type=int)
+parser.add_argument('--num_train_epochs', required=True, type=int)
+
+forder_best = vars(parser.parse_args())['forder_best']
+forder_latest = vars(parser.parse_args())['forder_latest']
+forder_epoch = vars(parser.parse_args())['forder_epoch']
+
+eval_freq = vars(parser.parse_args())['eval_freq']
+latest_freq = vars(parser.parse_args())['latest_freq']
+display_freq = vars(parser.parse_args())['display_freq']
+num_train_epochs = vars(parser.parse_args())['num_train_epochs']
+
+
+if not os.path.exists(forder_best):
+    os.makedirs(forder_best)
+if not os.path.exists(forder_latest):
+    os.makedirs(forder_latest)
+if not os.path.exists(forder_best):
+    os.makedirs(forder_best)
 
 writer = SummaryWriter("runs")
 task = Task.init(project_name='ID Card', task_name='test model')
@@ -53,11 +85,7 @@ model.to(device)
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
 global_step = 0
-eval_freq = 250
-latest_freq = 500
-display_freq = 100
 loss_best = 100
-num_train_epochs = 4
 
 
 #put the model in training mode
@@ -101,19 +129,18 @@ for epoch in range(num_train_epochs):
           print(loss_eval)
           if(loss_eval < loss_best):
             loss_best = loss_eval
-            model.save_pretrained("Checkpoints/Best")
+            model.save_pretrained(forder_best)
             print("Saving the best model")
           model.train()
         
         if global_step % latest_freq == 0 and global_step >= latest_freq:
-          model.save_pretrained("Checkpoints/Latest")
+          model.save_pretrained(forder_latest)
           print("Saving the latest model")
-
-        model.save.pretrained("Checkpoints/Epoch")
-        print("Saving the latest epoch model")
 
         loss.backward()
         optimizer.step()
         global_step += 1
+   model.save_pretrained(forder_epoch)
+   print("Saving the latest epoch model")
 
 #model.save_pretrained("Checkpoints")
