@@ -7,9 +7,13 @@ from collections import Counter
 import shutil, os
 from tqdm.notebook import tqdm
 import pickle
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--save_forder', required=True, type=str)
+save_forder = vars(parser.parse_args())['save_forder']
 
-if not os.path.exists('debug_pkl_real'):
-    os.makedirs('debug_pkl_real')
+if not os.path.exists(save_forder):
+    os.makedirs(save_forder)
 
 
 def normalize_bbox(bbox, width, height):
@@ -88,7 +92,7 @@ def generate_annotations(path: str):
                     words.append(words_example)
                     boxes.append(boxes_example)
                     labels.append(labels_example)
-                    path_save = 'debug_pkl_real/debug' + '_' + str(count)
+                    path_save = save_forder +'/debug' + '_' + str(count)
                     os.makedirs(path_save, exist_ok = True)
                     os.makedirs(os.path.join(path_save,'image'), exist_ok = True)
                     with open(path_save + '/anno.'+'pkl', 'wb') as t:
