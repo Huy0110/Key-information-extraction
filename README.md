@@ -15,11 +15,12 @@ pip install -q ./transformers
 
 # Dataset
 
-- The example of original datase has 3 forders: Train, Val, Test as in this repo
+- The example of original dataset: https://drive.google.com/drive/folders/12S7zZPQc0rkKgSEsxCnAlMpaI2oqKFGH?usp=sharing
+- 3 forder train, val, test as in repo is the sample of result after process the original dataset 
 - The formated dataset is similar to https://drive.google.com/drive/folders/1_r2rgPKBqqFmEFoNvz2lQGfIIfRALJ_W
 
 # Run
-## Converted original dataset to the formated dataset
+## Converted original dataset to 3 forder train,val,test
 ```bash
 python data_process.py
 ```
