@@ -20,32 +20,34 @@ pip install -q ./transformers
 - The formated dataset is similar to https://drive.google.com/drive/folders/1_r2rgPKBqqFmEFoNvz2lQGfIIfRALJ_W
 
 # Run
-## Converted original dataset to 3 forder train,val,test
+
+## 1. Process with data
+### Converted original dataset to 3 forder train,val,test
 ```bash
 python data_process.py
 ```
-## Make file .pkl for data
+### Make file .pkl for data
 ```bash
 python gennerate_data.py
 ```
-## Visualise the data to verify
+### Visualise the data to verify
 ```bash
 python visualise.py
 ```
 ### Note:
 If you want to visualise the data, you need to remove the normalize step in gennerate_data.py
 
-## Train
+## 2. Train
 ```bash
 bash script_train.sh
 ```
 
-## Test
+## 3. Test
 ```bash
 python test.py --path_test 'Best'
 ```
 
-## Inference
+## 4. Inference
 ```bash
 python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```
@@ -54,7 +56,7 @@ python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 python new_get_tet_inference_result.py --path_check 'Best' --save_forder 'debug_pkl'
 ```
 
-## Save the Checkpoint to Drive
+## 5. Save the Checkpoint to Drive
 You can use rclone to do this task, for example:
 ```bash
 bash script.sh
