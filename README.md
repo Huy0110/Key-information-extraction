@@ -62,3 +62,6 @@ You can use rclone to do this task, for example:
 bash script.sh
 ```
 In addition, you can change the path or forder in script.sh to save the forder you want to your Drive
+
+## References
+https://colab.research.google.com/github/NielsRogge/Transformers-Tutorials/blob/master/LayoutLMv2/CORD/Fine_tuning_LayoutLMv2ForTokenClassification_on_CORD.ipynb#scrollTo=Gq5CmIRZUy9O
