@@ -5,7 +5,12 @@
 ### Run this to install transformer:
 ```bash
 git clone -b modeling_layoutlmv2_v2 https://github.com/NielsRogge/transformers.git
+```
+```bash
 pip install -q ./transformers
+```
+```bash
+pip install git+https://github.com/huggingface/transformers
 ```
 ### Install:
 - seqeval
