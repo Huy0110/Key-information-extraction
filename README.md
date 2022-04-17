@@ -49,7 +49,7 @@ python test.py --path_test 'Best'
 
 ## 4. Inference
 ```bash
-python new_gennerate_for_inference.py --save_forder 'debug_pkl'
+python new_generate_for_inference.py --save_forder 'debug_pkl'
 ```
 
 ```bash
