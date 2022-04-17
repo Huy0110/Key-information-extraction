@@ -47,11 +47,17 @@ class DatasetIDCard(Dataset):
         # use processor to prepare everything
         encoded_inputs = self.processor(image, words, boxes=boxes, word_labels=word_labels, 
                                         padding="max_length", truncation=True, 
-                                        return_tensors="pt")
+                                        return_tensors="pt", max_length = 512, return_token_type_ids = True)
         
         # remove batch dimension
         for k,v in encoded_inputs.items():
           encoded_inputs[k] = v.squeeze()
+        #print(encoded_inputs.input_ids.shape)
+        #print(encoded_inputs.attention_mask.shape)
+        #print(encoded_inputs.token_type_ids.shape)
+        #print(encoded_inputs.bbox.shape)
+        #print(encoded_inputs.image.shape)
+        #print(encoded_inputs.labels.shape)
 
         assert encoded_inputs.input_ids.shape == torch.Size([512])
         assert encoded_inputs.attention_mask.shape == torch.Size([512])
