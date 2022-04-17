@@ -28,7 +28,7 @@ python data_process.py
 ```
 ### Make file .pkl for data
 ```bash
-python gennerate_data.py
+python generate_data.py
 ```
 ### Visualise the data to verify
 ```bash
@@ -49,7 +49,7 @@ python test.py --path_test 'Best'
 
 ## 4. Inference
 ```bash
-python new_generate_for_inference.py --save_forder 'debug_pkl'
+python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```
 
 ```bash
