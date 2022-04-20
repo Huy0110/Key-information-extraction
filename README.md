@@ -31,13 +31,18 @@ pip install git+https://github.com/huggingface/transformers
 ```bash
 python data_process.py
 ```
-### Make file .pkl for data
+### Make file .pkl for data  (In case of the input has token)
 ```bash
 python generate_data.py
 ```
+
+### Make file .pkl for data  (In case of the input has segment)
+```bash
+python new_gen_for_segment.py --path_train 'train/json' --path_val 'val/json' --path_test 'test/json'
+```
 ### Visualise the data to verify
 ```bash
-python visualise.py
+python visualize.py
 ```
 ### Note:
 If you want to visualise the data, you need to remove the normalize step in gennerate_data.py
@@ -53,6 +58,7 @@ python test.py --path_test 'Best'
 ```
 
 ## 4. Inference
+### For the whole forder
 ```bash
 python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```
@@ -60,6 +66,15 @@ python new_gennerate_for_inference.py --save_forder 'debug_pkl'
 ```bash
 python new_get_tet_inference_result.py --path_check 'Best' --save_forder 'debug_pkl'
 ```
+
+### For only one input
+```bash
+python new_gen_inference_for_one.py --path_image 'your image path' --path_json 'your json path' --path_save 'your path you want to save'
+```
+```bash
+python new_inference_for_one.py --path_test 'your path(path_save in the previous command)' --path_check 'Best'
+```
+
 
 ## 5. Save the Checkpoint to Drive
 You can use rclone to do this task, for example:
